@@ -11,6 +11,8 @@
     - [ ] calc
 - [ ] Launch command from the shell in the user PATH
 - [ ] Add new folders to path
+- [ ] Add autocompletion
+- [ ] Add hinting
 - [ ] Add redirection in files
     - [ ] \>
     - [ ] \<
