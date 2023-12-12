@@ -2,8 +2,11 @@
 
 **Tinysh: a minimalistic for educational purpose only shell**
 
-## TODO List
+## TODO  
 
+- [X] REPL
+- [ ] Lexer
+- [ ] Parser
 - [ ] Add built in
     - [ ] ls
     - [ ] cat
