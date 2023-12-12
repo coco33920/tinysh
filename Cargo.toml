@@ -1,8 +1,40 @@
 [package]
 name = "tinysh"
 version = "0.1.0"
+license = "GPL-3.0-or-later"
+description = "A tiny shell built for educational purposes"
+homepage = "https://tinysh.nwa2coco.fr"
+repository = "https://github.com/coco33920/tinysh"
+readme = "README.md"
 edition = "2021"
+exclude = [
+ "docs/*",
+ "manual/*",
+ "manual.pdf"
+]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+ansi_term = "0.12.1"
+linefeed = "0.6"
+confy = "0.5.1"
+serde = { version = "1.0.192", features = ["derive"] }
+
+# Config for 'cargo dist'
+[workspace.metadata.dist]
+# The preferred cargo-dist version to use in CI (Cargo.toml SemVer syntax)
+cargo-dist-version = "0.4.3"
+# CI backends to support
+ci = ["github"]
+# The installers to generate for each app
+installers = ["shell"]
+# Target platforms to build apps for (Rust target-triple syntax)
+targets = ["x86_64-unknown-linux-gnu", "aarch64-apple-darwin", "x86_64-apple-darwin", "x86_64-pc-windows-msvc"]
+# Publish jobs to run in CI
+pr-run-mode = "plan"
+
+# The profile that 'cargo dist' will build with
+[profile.dist]
+inherits = "release"
+lto = "thin"
