@@ -10,7 +10,8 @@ pub fn is_an_allowed_character(character: char) -> bool {
         || character == '_'
         || character == '~'
         || character == '('
-        || character == ')';
+        || character == ')'
+        || character == '.';
 }
 
 pub struct Lexer {
@@ -56,15 +57,17 @@ impl Lexer {
 
 #[cfg(test)]
 mod test {
-    use super::is_an_allowed_character;
+    use crate::lexing::token::Token;
+
+    use super::{is_an_allowed_character, Lexer};
 
     #[test]
     pub fn test_allowed() {
         let expected = vec![
-            'c', 'l', 'm', '&', '|', '>', '<', '-', '_', '0', '~', '(', ')',
+            'c', 'l', 'm', '&', '|', '>', '<', '-', '_', '0', '~', '(', ')', '.',
         ];
         let value = vec![
-            'c', 'l', 'm', '&', '|', '>', '<', '-', '_', '0', '~', '^', '(', ')', '%',
+            'c', 'l', 'm', '&', '|', '>', '<', '-', '_', '0', '~', '^', '(', ')', '%', '.',
         ];
         let mut final_value = Vec::new();
         value
@@ -72,5 +75,23 @@ mod test {
             .filter(|x| is_an_allowed_character(x.clone()))
             .for_each(|f| final_value.push(f));
         assert_eq!(final_value, expected)
+    }
+
+    #[test]
+    pub fn test_lex_operators() {
+        let expected = vec![
+            Token::Pipe,
+            Token::RPar,
+            Token::LPar,
+            Token::LeftRedirection,
+            Token::RightRedirection,
+            Token::Dash,
+            Token::Tilde,
+            Token::And,
+        ];
+        let value = Lexer {
+            str: "|)(><-~&&".to_string(),
+        };
+        assert_eq!(value.lex(), expected);
     }
 }
