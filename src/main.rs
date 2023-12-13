@@ -1,6 +1,8 @@
 use ansi_term::Color;
 use linefeed::{Interface, ReadResult};
 
+use crate::lexing::lexer::Lexer;
+
 mod lexing;
 
 fn main() {
@@ -37,7 +39,10 @@ fn main() {
             "info" => {
                 println!("{}",Color::Purple.paint(" Tinysh v0.0.1\n By Charlotte Thomas\n Repository: https://github.com/tinysh"))
             }
-            _ => (),
+            _ => {
+                let lexer = Lexer { str: line };
+                println!("{:?}", lexer.lex());
+            }
         }
     }
     println!("{}", Color::Blue.paint("Exiting tinysh, goodbye :)"));
