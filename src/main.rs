@@ -1,6 +1,8 @@
 use ansi_term::Color;
 use linefeed::{Interface, ReadResult};
 
+mod lexing;
+
 fn main() {
     let interface = Interface::new("tinysh").unwrap();
     let style = Color::Cyan;
