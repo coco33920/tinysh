@@ -118,7 +118,11 @@ impl Lexer {
             }
             char = char_iter.next();
         }
-        vec
+        let mut final_vec = Vec::new();
+        vec.into_iter()
+            .filter(|x| &Token::PreAnd != x)
+            .for_each(|f| final_vec.push(f));
+        final_vec
     }
 }
 
@@ -194,6 +198,15 @@ mod test {
         let expected = vec![Token::And, Token::Or];
         let value = Lexer {
             str: "and or".to_string(),
+        };
+        assert_eq!(value.lex(), expected);
+    }
+
+    #[test]
+    pub fn remove_preand() {
+        let expected = vec![];
+        let value = Lexer {
+            str: "&".to_string(),
         };
         assert_eq!(value.lex(), expected);
     }
