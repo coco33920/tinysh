@@ -54,6 +54,19 @@ impl Lexer {
         str
     }
 
+    fn lex_float(self, whole_side: i64, chars: &mut Chars) -> f64 {
+        let current_char_options = chars.next();
+        let current_char = match current_char_options {
+            Some(t) => t,
+            None => '0',
+        };
+        let a = self.lex_raddix(chars, Some(current_char));
+        let f = (&*(whole_side.to_string().as_str().to_owned() + "." + a.as_str())).parse();
+        if f.is_err() {
+            return f64::NAN;
+        }
+        f.unwrap()
+    }
     fn lex_string(self, chars: &mut Chars, mut current_char: Option<char>) -> String {
         let mut str: String = String::new();
         str += &*current_char.unwrap().to_string();
@@ -112,7 +125,15 @@ impl Lexer {
                 ch => {
                     if ch.is_numeric() {
                         let a = self.lex_int(&mut char_iter, ch);
-                        Token::Int(a)
+                        let mut next = char_iter.clone().peekable();
+                        match next.peek() {
+                            Some(p) if *p == '.' => {
+                                char_iter.next();
+                                let f = self.clone().lex_float(a, &mut char_iter);
+                                Token::Float(f)
+                            }
+                            _ => Token::Int(a),
+                        }
                     } else if ch.is_alphabetic() {
                         let str = self.clone().lex_string(&mut char_iter, Some(ch));
                         match str.as_str() {
@@ -122,6 +143,9 @@ impl Lexer {
                             "and" => Token::And,
                             _ => Token::Identifier(str),
                         }
+                    } else if ch == '.' {
+                        let f = self.clone().lex_float(0, &mut char_iter);
+                        Token::Float(f)
                     } else {
                         Token::Null
                     }
@@ -225,6 +249,33 @@ mod test {
         let expected = vec![];
         let value = Lexer {
             str: "&".to_string(),
+        };
+        assert_eq!(value.lex(), expected);
+    }
+
+    #[test]
+    pub fn simple_float() {
+        let expected = vec![Token::Float(0.1)];
+        let value = Lexer {
+            str: ".1".to_string(),
+        };
+        assert_eq!(value.lex(), expected);
+    }
+
+    #[test]
+    pub fn harder_float() {
+        let expected = vec![Token::Float(1.1)];
+        let value = Lexer {
+            str: "1.1".to_string(),
+        };
+        assert_eq!(value.lex(), expected);
+    }
+
+    #[test]
+    pub fn float_in_expr() {
+        let expected = vec![Token::Float(1.1), Token::And, Token::Float(2.2)];
+        let value = Lexer {
+            str: "1.1 && 2.2".to_string(),
         };
         assert_eq!(value.lex(), expected);
     }
