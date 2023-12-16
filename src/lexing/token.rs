@@ -4,6 +4,8 @@ pub enum Token {
     Float(f64),
     Identifier(String),
     Bool(bool),
+    Quote,
+    Whitespace,
     And,
     Or,
     PreAnd,

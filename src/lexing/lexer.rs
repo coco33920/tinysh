@@ -13,7 +13,9 @@ pub fn is_an_allowed_character(character: char) -> bool {
         || character == '~'
         || character == '('
         || character == ')'
-        || character == '.';
+        || character == '.'
+        || character == '"'
+        || character == ' ';
 }
 
 #[derive(Clone, PartialEq)]
@@ -74,6 +76,7 @@ impl Lexer {
         let mut char_iter = self.str.chars();
         let mut vec = Vec::new();
         let mut char = char_iter.next();
+        let mut quote = 0;
         while char != None {
             let v = match char.unwrap() {
                 p if !is_an_allowed_character(p) => Token::Null,
@@ -84,6 +87,17 @@ impl Lexer {
                 ')' => Token::RPar,
                 '(' => Token::LPar,
                 '-' => Token::Dash,
+                '"' => {
+                    quote += 1;
+                    Token::Quote
+                }
+                ' ' => {
+                    if quote % 2 == 1 {
+                        Token::Whitespace
+                    } else {
+                        Token::Null
+                    }
+                }
                 '&' => {
                     let v = vec.pop();
                     match v {
@@ -135,10 +149,11 @@ mod test {
     #[test]
     pub fn test_allowed() {
         let expected = vec![
-            'c', 'l', 'm', '&', '|', '>', '<', '-', '_', '0', '~', '(', ')', '.',
+            'c', 'l', 'm', '&', '|', '>', '<', '-', '_', '0', '~', '(', ')', '.', ' ', '"', ' ',
         ];
         let value = vec![
-            'c', 'l', 'm', '&', '|', '>', '<', '-', '_', '0', '~', '^', '(', ')', '%', '.',
+            'c', 'l', 'm', '&', '|', '>', '<', '-', '_', '0', '~', '^', '(', ')', '%', '.', ' ',
+            '$', '"', ' ',
         ];
         let mut final_value = Vec::new();
         value
@@ -159,9 +174,12 @@ mod test {
             Token::Dash,
             Token::Tilde,
             Token::And,
+            Token::Quote,
+            Token::Whitespace,
+            Token::Quote,
         ];
         let value = Lexer {
-            str: "|)(><-~&&".to_string(),
+            str: "|)(><-~&&\" \" ".to_string(),
         };
         assert_eq!(value.lex(), expected);
     }
