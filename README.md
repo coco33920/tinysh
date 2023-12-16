@@ -10,7 +10,7 @@
 ## TODO  
 
 - [X] REPL
-- [ ] Lexer
+- [X] Lexer
 - [ ] Parser
 - [ ] Add built in
     - [ ] ls

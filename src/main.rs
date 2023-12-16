@@ -9,7 +9,7 @@ fn main() {
     let interface = Interface::new("tinysh").unwrap();
     let style = Color::Cyan;
     let prompt_text = "tinysh> ";
-    let mut verbose = false;
+    let mut verbose = true;
 
     println!(
         "{}",
@@ -26,7 +26,7 @@ fn main() {
         .unwrap();
 
     while let ReadResult::Input(line) = interface.read_line().unwrap() {
-        match line.as_str() {
+        match line.as_str().trim() {
             "exit" => break,
             "verbose" => {
                 verbose = !verbose;
@@ -40,10 +40,11 @@ fn main() {
                 println!("{}",Color::Purple.paint(" Tinysh v0.0.1\n By Charlotte Thomas\n Repository: https://github.com/tinysh"))
             }
             _ => {
-                let lexer = Lexer { str: line };
+                let lexer = Lexer { str: line.clone() };
                 println!("{:?}", lexer.lex());
             }
         }
+        interface.add_history_unique(line);
     }
     println!("{}", Color::Blue.paint("Exiting tinysh, goodbye :)"));
 }
