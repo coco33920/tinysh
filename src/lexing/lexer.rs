@@ -52,6 +52,24 @@ impl Lexer {
         str
     }
 
+    fn lex_string(self, chars: &mut Chars, mut current_char: Option<char>) -> String {
+        let mut str: String = String::new();
+        str += &*current_char.unwrap().to_string();
+        let mut peekable = chars.clone().peekable();
+        while current_char != None {
+            current_char = peekable.next();
+            if current_char == None {
+                break;
+            }
+            if !(current_char.unwrap().is_alphanumeric() || current_char.unwrap() == '_') {
+                break;
+            }
+            current_char = chars.next();
+            str += &*current_char.unwrap().to_string();
+        }
+
+        str
+    }
     pub fn lex(&self) -> Vec<Token> {
         let mut char_iter = self.str.chars();
         let mut vec = Vec::new();
@@ -81,6 +99,15 @@ impl Lexer {
                     if ch.is_numeric() {
                         let a = self.lex_int(&mut char_iter, ch);
                         Token::Int(a)
+                    } else if ch.is_alphabetic() {
+                        let str = self.clone().lex_string(&mut char_iter, Some(ch));
+                        match str.as_str() {
+                            "false" => Token::Bool(false),
+                            "true" => Token::Bool(true),
+                            "or" => Token::Or,
+                            "and" => Token::And,
+                            _ => Token::Identifier(str),
+                        }
                     } else {
                         Token::Null
                     }
@@ -131,6 +158,42 @@ mod test {
         ];
         let value = Lexer {
             str: "|)(><-~&&".to_string(),
+        };
+        assert_eq!(value.lex(), expected);
+    }
+
+    #[test]
+    pub fn test_lex_int() {
+        let expected = vec![Token::Int(10), Token::And, Token::Int(11)];
+        let value = Lexer {
+            str: "10&&11".to_string(),
+        };
+        assert_eq!(value.lex(), expected)
+    }
+
+    #[test]
+    pub fn test_lex_str() {
+        let expected = vec![Token::Identifier("test".to_string())];
+        let value = Lexer {
+            str: "test".to_string(),
+        };
+        assert_eq!(value.lex(), expected)
+    }
+
+    #[test]
+    pub fn test_bool() {
+        let expected = vec![Token::Bool(true), Token::And, Token::Bool(false)];
+        let value = Lexer {
+            str: "true&&false".to_string(),
+        };
+        assert_eq!(value.lex(), expected)
+    }
+
+    #[test]
+    pub fn test_or_and() {
+        let expected = vec![Token::And, Token::Or];
+        let value = Lexer {
+            str: "and or".to_string(),
         };
         assert_eq!(value.lex(), expected);
     }
