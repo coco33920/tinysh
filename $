@@ -37,9 +37,10 @@ impl Lexer {
     fn lex_raddix(self, chars: &mut Chars, mut current_char: Option<char>) -> String {
         let mut str: String = String::new();
         str += &*current_char.unwrap().to_string();
-        let mut peekable = chars.clone().peekable();
         while current_char != None {
-            current_char = peekable.next();
+            current_char = chars.peekable().next();
+
+            println!("{:?}",current_char);
             if current_char == None {
                 break;
             }
@@ -47,6 +48,7 @@ impl Lexer {
                 break;
             }
             current_char = chars.next();
+            println!("{:?}",current_char);
             str += &*current_char.unwrap().to_string();
         }
         str
