@@ -1,4 +1,4 @@
-use std::{str::Chars, thread::current};
+use std::str::Chars;
 
 use super::token::Token;
 
