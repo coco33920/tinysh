@@ -4,6 +4,7 @@ use linefeed::{Interface, ReadResult};
 use crate::lexing::lexer::Lexer;
 
 mod lexing;
+mod parsing;
 
 fn main() {
     let interface = Interface::new("tinysh").unwrap();
