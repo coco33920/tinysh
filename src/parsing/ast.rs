@@ -1,5 +1,7 @@
 use std::fmt::Display;
 
+use crate::lexing::token::Token;
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum Parameters {
     Int(i64),
@@ -13,6 +15,7 @@ pub enum Parameters {
     Assign,
     And,
     Or,
+    Null,
     Call(String, Vec<String>),
 }
 
@@ -40,6 +43,7 @@ impl Display for Parameters {
             Parameters::Assign => write!(f, "="),
             Parameters::And => write!(f, "&&"),
             Parameters::Or => write!(f, "or"),
+            Parameters::Null => write!(f, ""),
             Parameters::Call(s, l) => write!(f, "{} {}", s, l.join(" ")),
         }
     }
@@ -56,6 +60,21 @@ impl Display for Ast {
     }
 }
 
+pub fn token_to_parameter(token: Token) -> Parameters {
+    match token {
+        Token::Or => Parameters::Or,
+        Token::And => Parameters::And,
+        Token::Pipe => Parameters::Pipe,
+        Token::Int(s) => Parameters::Int(s.clone()),
+        Token::Float(s) => Parameters::Float(s.clone()),
+        Token::Identifier(s) => Parameters::Identifier(s.clone()),
+        Token::Bool(b) => Parameters::Bool(b.clone()),
+        Token::LeftRedirection => Parameters::LeftRedirection,
+        Token::RightRedirection => Parameters::RightRedirection,
+        _ => Parameters::Null,
+    }
+}
+
 impl Ast {
     pub fn new(p: Parameters) -> Ast {
         Ast::Node {
@@ -68,11 +87,13 @@ impl Ast {
 
 #[cfg(test)]
 mod test {
-    use super::{Ast, Parameters};
+    use crate::lexing::token::Token;
+
+    use super::{token_to_parameter, Ast, Parameters};
 
     #[test]
     fn test_display_parameters() {
-        let expected = "[5, 5.5, test, test2, false, |, >, <, =, &&, or, ls color]";
+        let expected = "[5, 5.5, test, test2, false, |, >, <, =, &&, or, ls color, ]";
         let value = vec![
             Parameters::Int(5),
             Parameters::Float(5.5),
@@ -86,6 +107,7 @@ mod test {
             Parameters::And,
             Parameters::Or,
             Parameters::Call("ls".to_string(), vec!["color".to_string()]),
+            Parameters::Null,
         ];
         let mut final_vec = Vec::new();
         value
@@ -108,6 +130,39 @@ mod test {
         let expected = "5";
         let v = Ast::new(Parameters::Int(5));
         let value = format!("{v}");
+        assert_eq!(value, expected);
+    }
+
+    #[test]
+    fn test_token_to_parameter() {
+        let expected = vec![
+            Parameters::Identifier("t".to_string()),
+            Parameters::Int(5),
+            Parameters::Float(5.5),
+            Parameters::Or,
+            Parameters::And,
+            Parameters::Pipe,
+            Parameters::LeftRedirection,
+            Parameters::RightRedirection,
+            Parameters::Bool(false),
+            Parameters::Null,
+        ];
+        let v = vec![
+            Token::Identifier("t".to_string()),
+            Token::Int(5),
+            Token::Float(5.5),
+            Token::Or,
+            Token::And,
+            Token::Pipe,
+            Token::LeftRedirection,
+            Token::RightRedirection,
+            Token::Bool(false),
+            Token::PreAnd,
+        ];
+        let mut value = Vec::new();
+        v.into_iter()
+            .map(|f| token_to_parameter(f))
+            .for_each(|v| value.push(v));
         assert_eq!(value, expected);
     }
 }
