@@ -15,7 +15,7 @@ fn main() {
 
     println!(
         "{}",
-        Color::Blue.paint("Welcome to tinysh 0.0.2 by Charlotte Thomas")
+        Color::Blue.paint("Welcome to tinysh 0.0.3 by Charlotte Thomas")
     );
 
     interface
@@ -39,7 +39,7 @@ fn main() {
                 )
             }
             "info" => {
-                println!("{}",Color::Purple.paint(" Tinysh v0.0.2\n By Charlotte Thomas\n Repository: https://github.com/tinysh"))
+                println!("{}",Color::Purple.paint(" Tinysh v0.0.3\n By Charlotte Thomas\n Repository: https://github.com/tinysh"))
             }
             _ => {
                 let lexer = Lexer { str: line.clone() };

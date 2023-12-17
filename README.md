@@ -11,7 +11,7 @@
 
 - [X] REPL
 - [X] Lexer
-- [ ] Parser
+- [X] Parser
 - [ ] Add built in
     - [ ] ls
     - [ ] cat
