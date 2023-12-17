@@ -6,6 +6,7 @@ use crate::lexing::lexer::Lexer;
 mod lexing;
 mod parsing;
 
+#[cfg(not(tarpaulin_include))]
 fn main() {
     let interface = Interface::new("tinysh").unwrap();
     let style = Color::Cyan;
