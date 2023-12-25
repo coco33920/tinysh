@@ -26,7 +26,7 @@ fn main() {
             suffix = style.suffix()
         ))
         .unwrap();
-    
+
     while let ReadResult::Input(line) = interface.read_line().unwrap() {
         match line.as_str().trim() {
             "exit" => break,
