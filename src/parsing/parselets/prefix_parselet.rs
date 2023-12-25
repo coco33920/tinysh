@@ -6,3 +6,11 @@ use crate::{
 pub trait PrefixParselet {
     fn parse(&self, parser: &mut Parser, token: Token) -> Ast;
 }
+
+pub struct NullParselet {}
+
+impl PrefixParselet for NullParselet {
+    fn parse(&self, _parser: &mut Parser, _token: Token) -> Ast {
+        Ast::Nil
+    }
+}

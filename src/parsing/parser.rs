@@ -2,7 +2,13 @@ use std::slice::Iter;
 
 use crate::lexing::token::{Token, TokenType};
 
-use super::ast::Ast;
+use super::{
+    ast::Ast,
+    parselets::{
+        infix_parselet::{InfixParselet, NullParset},
+        prefix_parselet::{NullParselet, PrefixParselet},
+    },
+};
 
 #[derive(Clone)]
 pub struct Parser<'a> {
@@ -64,6 +70,27 @@ impl Parser<'_> {
                     Token::Null
                 }
             }
+        }
+    }
+    fn get_precedence(&mut self) -> i64 {
+        let p: Option<Box<dyn InfixParselet>> = self
+            .clone()
+            .get_infix_parselet(self.look_ahead(0).to_token_type());
+        match p {
+            None => 0,
+            Some(t) => (*t).get_precedence(),
+        }
+    }
+
+    pub fn get_infix_parselet(self, token_type: TokenType) -> Option<Box<dyn InfixParselet>> {
+        match token_type {
+            _ => Some(Box::from(NullParset {})),
+        }
+    }
+
+    pub fn get_prefix_parselet(self, token_type: TokenType) -> Option<Box<dyn PrefixParselet>> {
+        match token_type {
+            _ => Some(Box::from(NullParselet {})),
         }
     }
 }
