@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 #[derive(Debug, PartialEq, PartialOrd, Clone)]
 pub enum Token {
     Int(i64),
@@ -62,9 +64,31 @@ impl Token {
     }
 }
 
+impl Display for Token {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Token::Int(i) => write!(f, "{i}"),
+            Token::Float(fs) => write!(f, "{fs}"),
+            Token::Identifier(s) => write!(f, "{s}"),
+            Token::Bool(b) => write!(f, "{b}"),
+            Token::Quote => write!(f, "\""),
+            Token::Whitespace => write!(f, " "),
+            Token::And => write!(f, "&&"),
+            Token::Or => write!(f, "or"),
+            Token::Pipe => write!(f, "|"),
+            Token::LeftRedirection => write!(f, ">"),
+            Token::RightRedirection => write!(f, "<"),
+            Token::LPar => write!(f, "("),
+            Token::RPar => write!(f, ")"),
+            Token::Tilde => write!(f, "~"),
+            Token::Dash => write!(f, "-"),
+            _ => write!(f, ""),
+        }
+    }
+}
+
 #[cfg(test)]
 mod test {
-    use crate::parsing::ast::token_to_parameter;
 
     use super::{Token, TokenType};
 
@@ -113,5 +137,52 @@ mod test {
         data.into_iter()
             .zip(expected.into_iter())
             .for_each(|(x, y)| assert_eq!(x.to_token_type(), y));
+    }
+
+    #[test]
+    fn test_display() {
+        let expected = vec![
+            "1".to_string(),
+            "0.1".to_string(),
+            "test".to_string(),
+            "false".to_string(),
+            "\"".to_string(),
+            " ".to_string(),
+            "&&".to_string(),
+            "or".to_string(),
+            "|".to_string(),
+            ">".to_string(),
+            "<".to_string(),
+            "(".to_string(),
+            ")".to_string(),
+            "~".to_string(),
+            "-".to_string(),
+            "".to_string(),
+            "".to_string(),
+        ];
+
+        let data = vec![
+            Token::Int(1),
+            Token::Float(0.1),
+            Token::Identifier("test".to_string()),
+            Token::Bool(false),
+            Token::Quote,
+            Token::Whitespace,
+            Token::And,
+            Token::Or,
+            Token::Pipe,
+            Token::LeftRedirection,
+            Token::RightRedirection,
+            Token::LPar,
+            Token::RPar,
+            Token::Tilde,
+            Token::Dash,
+            Token::Null,
+            Token::PreAnd,
+        ];
+
+        data.into_iter()
+            .zip(expected)
+            .for_each(|(x, y)| assert_eq!(x.to_string(), y));
     }
 }

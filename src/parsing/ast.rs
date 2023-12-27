@@ -12,7 +12,6 @@ pub enum Parameters {
     Pipe,
     LeftRedirection,
     RightRedirection,
-    Assign,
     And,
     Or,
     Null,
@@ -40,7 +39,6 @@ impl Display for Parameters {
             Parameters::Pipe => write!(f, "|"),
             Parameters::LeftRedirection => write!(f, ">"),
             Parameters::RightRedirection => write!(f, "<"),
-            Parameters::Assign => write!(f, "="),
             Parameters::And => write!(f, "&&"),
             Parameters::Or => write!(f, "or"),
             Parameters::Null => write!(f, ""),
@@ -93,7 +91,7 @@ mod test {
 
     #[test]
     fn test_display_parameters() {
-        let expected = "[5, 5.5, test, test2, false, |, >, <, =, &&, or, ls color, ]";
+        let expected = "[5, 5.5, test, test2, false, |, >, <, &&, or, ls color, ]";
         let value = vec![
             Parameters::Int(5),
             Parameters::Float(5.5),
@@ -103,7 +101,6 @@ mod test {
             Parameters::Pipe,
             Parameters::LeftRedirection,
             Parameters::RightRedirection,
-            Parameters::Assign,
             Parameters::And,
             Parameters::Or,
             Parameters::Call("ls".to_string(), vec!["color".to_string()]),

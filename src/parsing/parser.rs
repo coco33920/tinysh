@@ -6,7 +6,10 @@ use super::{
     ast::Ast,
     parselets::{
         infix_parselet::{InfixParselet, NullParset},
-        prefix_parselet::{NullParselet, PrefixParselet, ValueParselet},
+        prefix_parselet::{
+            GroupParselet, NullParselet, OperatorPrefixParselet, PrefixParselet, QuoteParselet,
+            ValueParselet,
+        },
     },
 };
 
@@ -28,6 +31,7 @@ impl Parser<'_> {
         self.parse_expression_empty()
     }
 
+    #[cfg(not(tarpaulin_include))]
     fn look_ahead(&mut self, distance: usize) -> Token {
         while distance >= self.read.len() {
             match self.tokens.next() {
@@ -117,6 +121,13 @@ impl Parser<'_> {
             TokenType::Float => Some(Box::from(ValueParselet {})),
             TokenType::Identifier => Some(Box::from(ValueParselet {})),
             TokenType::Bool => Some(Box::from(ValueParselet {})),
+            TokenType::Or => Some(Box::from(OperatorPrefixParselet {})),
+            TokenType::And => Some(Box::from(OperatorPrefixParselet {})),
+            TokenType::LPar => Some(Box::from(GroupParselet {})),
+            TokenType::LeftRedirection => Some(Box::from(OperatorPrefixParselet {})),
+            TokenType::RightRedirection => Some(Box::from(OperatorPrefixParselet {})),
+            TokenType::Pipe => Some(Box::from(OperatorPrefixParselet {})),
+            TokenType::Quote => Some(Box::from(QuoteParselet {})),
             _ => Some(Box::from(NullParselet {})),
         }
     }
@@ -124,6 +135,7 @@ impl Parser<'_> {
 
 #[cfg(test)]
 mod test {
+
     use crate::{
         lexing::lexer::Lexer,
         parsing::ast::{Ast, Parameters},
@@ -197,5 +209,107 @@ mod test {
         let parser = &mut init_calc_parser(&datalex);
         let value = parser.parse();
         assert_eq!(value, expected)
+    }
+
+    #[test]
+    pub fn test_parse_string() {
+        let expected = Ast::new(Parameters::Str("test 1 2 1 2".to_string()));
+        let data = Lexer {
+            str: "\"test 1 2 1 2\"".to_string(),
+        };
+        let datalex = data.lex();
+        let parser = &mut init_calc_parser(&datalex);
+        let value = parser.parse();
+        assert_eq!(value, expected)
+    }
+
+    #[test]
+    pub fn test_parse_and_prefix() {
+        let expected = Ast::Node {
+            value: Parameters::And,
+            left: Box::from(Ast::new(Parameters::Bool(true))),
+            right: Box::from(Ast::Nil),
+        };
+
+        let data = Lexer {
+            str: "&& true".to_string(),
+        };
+
+        let datalex = data.lex();
+        let parser = &mut init_calc_parser(&datalex);
+        let value = parser.parse();
+        assert_eq!(value, expected);
+    }
+
+    #[test]
+    pub fn test_parse_or_prefix() {
+        let expected = Ast::Node {
+            value: Parameters::Or,
+            left: Box::from(Ast::new(Parameters::Bool(true))),
+            right: Box::from(Ast::Nil),
+        };
+
+        let data = Lexer {
+            str: "or true".to_string(),
+        };
+
+        let datalex = data.lex();
+        let parser = &mut init_calc_parser(&datalex);
+        let value = parser.parse();
+        assert_eq!(value, expected);
+    }
+
+    #[test]
+    pub fn test_parse_leftredirect_prefix() {
+        let expected = Ast::Node {
+            value: Parameters::LeftRedirection,
+            left: Box::from(Ast::new(Parameters::Bool(true))),
+            right: Box::from(Ast::Nil),
+        };
+
+        let data = Lexer {
+            str: "> true".to_string(),
+        };
+
+        let datalex = data.lex();
+        let parser = &mut init_calc_parser(&datalex);
+        let value = parser.parse();
+        assert_eq!(value, expected);
+    }
+
+    #[test]
+    pub fn test_parse_rightredirect_prefix() {
+        let expected = Ast::Node {
+            value: Parameters::RightRedirection,
+            left: Box::from(Ast::new(Parameters::Bool(true))),
+            right: Box::from(Ast::Nil),
+        };
+
+        let data = Lexer {
+            str: "< true".to_string(),
+        };
+
+        let datalex = data.lex();
+        let parser = &mut init_calc_parser(&datalex);
+        let value = parser.parse();
+        assert_eq!(value, expected);
+    }
+
+    #[test]
+    pub fn test_parse_pipe_prefix() {
+        let expected = Ast::Node {
+            value: Parameters::Pipe,
+            left: Box::from(Ast::new(Parameters::Bool(true))),
+            right: Box::from(Ast::Nil),
+        };
+
+        let data = Lexer {
+            str: "| true".to_string(),
+        };
+
+        let datalex = data.lex();
+        let parser = &mut init_calc_parser(&datalex);
+        let value = parser.parse();
+        assert_eq!(value, expected);
     }
 }
