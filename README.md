@@ -28,3 +28,4 @@
     - [ ] \<<
 - [ ] Add piping
 - [ ] Customize the prompt
+- [ ] More
