@@ -25,7 +25,7 @@ pub fn init_calc_parser(input: &Vec<Token>) -> Parser {
 
 impl Parser<'_> {
     pub fn parse(&mut self) -> Ast {
-        Ast::Nil
+        self.parse_expression_empty()
     }
 
     fn look_ahead(&mut self, distance: usize) -> Token {
@@ -40,6 +40,29 @@ impl Parser<'_> {
             Some(t) => t.clone(),
         }
     }
+
+    pub fn parse_expression(&mut self, precedence: i64) -> Ast {
+        let mut token = self.consume();
+        let prefix = self
+            .clone()
+            .get_prefix_parselet(token.clone().to_token_type());
+
+        let mut left = prefix.unwrap().parse(self, token.clone());
+        while precedence < self.get_precedence() {
+            token = self.consume();
+            let parser = self
+                .clone()
+                .get_infix_parselet(token.clone().to_token_type())
+                .unwrap();
+            left = parser.parse(self, &left, token);
+        }
+        left
+    }
+
+    pub fn parse_expression_empty(&mut self) -> Ast {
+        self.parse_expression(0)
+    }
+
     pub fn consume(&mut self) -> Token {
         self.look_ahead(0);
         if self.read.len() == 0 {
