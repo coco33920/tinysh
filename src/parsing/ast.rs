@@ -19,7 +19,7 @@ pub enum Parameters {
     Call(String, Vec<String>),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Ast {
     Nil,
     Node {

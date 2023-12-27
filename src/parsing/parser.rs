@@ -6,7 +6,7 @@ use super::{
     ast::Ast,
     parselets::{
         infix_parselet::{InfixParselet, NullParset},
-        prefix_parselet::{NullParselet, PrefixParselet},
+        prefix_parselet::{NullParselet, PrefixParselet, ValueParselet},
     },
 };
 
@@ -113,7 +113,89 @@ impl Parser<'_> {
 
     pub fn get_prefix_parselet(self, token_type: TokenType) -> Option<Box<dyn PrefixParselet>> {
         match token_type {
+            TokenType::Int => Some(Box::from(ValueParselet {})),
+            TokenType::Float => Some(Box::from(ValueParselet {})),
+            TokenType::Identifier => Some(Box::from(ValueParselet {})),
+            TokenType::Bool => Some(Box::from(ValueParselet {})),
             _ => Some(Box::from(NullParselet {})),
         }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::{
+        lexing::lexer::Lexer,
+        parsing::ast::{Ast, Parameters},
+    };
+
+    use super::init_calc_parser;
+
+    #[test]
+    pub fn test_parse_int() {
+        let expected = Ast::Node {
+            value: Parameters::Int(1),
+            left: Box::from(Ast::Nil),
+            right: Box::from(Ast::Nil),
+        };
+
+        let data = Lexer {
+            str: "1".to_string(),
+        };
+        let datalex = data.lex();
+        let parser = &mut init_calc_parser(&datalex);
+        let value = parser.parse();
+        assert_eq!(value, expected)
+    }
+
+    #[test]
+    pub fn test_parse_float() {
+        let expected = Ast::Node {
+            value: Parameters::Float(1.0),
+            left: Box::from(Ast::Nil),
+            right: Box::from(Ast::Nil),
+        };
+
+        let data = Lexer {
+            str: "1.0".to_string(),
+        };
+        let datalex = data.lex();
+        let parser = &mut init_calc_parser(&datalex);
+        let value = parser.parse();
+        assert_eq!(value, expected)
+    }
+
+    #[test]
+    pub fn test_parse_false() {
+        let expected = Ast::Node {
+            value: Parameters::Bool(false),
+            left: Box::from(Ast::Nil),
+            right: Box::from(Ast::Nil),
+        };
+
+        let data = Lexer {
+            str: "false".to_string(),
+        };
+        let datalex = data.lex();
+        let parser = &mut init_calc_parser(&datalex);
+        let value = parser.parse();
+        assert_eq!(value, expected)
+    }
+
+    #[test]
+    pub fn test_parse_identifier() {
+        let expected = Ast::Node {
+            value: Parameters::Identifier("test".to_string()),
+            left: Box::from(Ast::Nil),
+            right: Box::from(Ast::Nil),
+        };
+
+        let data = Lexer {
+            str: "test".to_string(),
+        };
+        let datalex = data.lex();
+        let parser = &mut init_calc_parser(&datalex);
+        let value = parser.parse();
+        assert_eq!(value, expected)
     }
 }

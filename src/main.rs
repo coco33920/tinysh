@@ -8,6 +8,8 @@ mod parsing;
 
 #[cfg(not(tarpaulin_include))]
 fn main() {
+    use crate::parsing::parser::init_calc_parser;
+
     let interface = Interface::new("tinysh").unwrap();
     let style = Color::Cyan;
     let prompt_text = "tinysh> ";
@@ -43,7 +45,13 @@ fn main() {
             }
             _ => {
                 let lexer = Lexer { str: line.clone() };
-                println!("{:?}", lexer.lex());
+                let data = lexer.lex();
+                let parser = &mut init_calc_parser(&data);
+                let ast = parser.parse();
+                println!("Lexing of line : {}", &line);
+                println!("{:?}", &data);
+                println!("Parsing");
+                println!("{:?}", &ast);
             }
         }
         interface.add_history_unique(line);
