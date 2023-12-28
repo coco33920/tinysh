@@ -166,6 +166,7 @@ impl Lexer {
 
 #[cfg(test)]
 mod test {
+
     use crate::lexing::token::Token;
 
     use super::{is_an_allowed_character, Lexer};
@@ -278,5 +279,40 @@ mod test {
             str: "1.1 && 2.2".to_string(),
         };
         assert_eq!(value.lex(), expected);
+    }
+
+    #[test]
+    pub fn test_lex_string_error() {
+        let expected = 0;
+        let mut chars = "ss".chars();
+        let first_char = chars.next().unwrap();
+        let value = Lexer {
+            str: "str".to_string(),
+        }
+        .lex_int(&mut chars, first_char);
+        assert_eq!(value, expected);
+    }
+
+    #[test]
+    pub fn test_lex_float_error_nan() {
+        let mut chars = "ss".chars();
+        let _first_char = chars.next().unwrap();
+        let value = Lexer {
+            str: "str".to_string(),
+        }
+        .lex_float(0, &mut chars);
+        assert_eq!(true, value.is_nan());
+    }
+
+    #[test]
+    pub fn test_lex_float_error() {
+        let expected = 0f64;
+        let mut chars = "s".chars();
+        let _ = chars.next();
+        let value = Lexer {
+            str: "str".to_string(),
+        }
+        .lex_float(0, &mut chars);
+        assert_eq!(value, expected);
     }
 }

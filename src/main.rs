@@ -4,9 +4,12 @@ use linefeed::{Interface, ReadResult};
 use crate::lexing::lexer::Lexer;
 
 mod lexing;
+mod parsing;
 
 #[cfg(not(tarpaulin_include))]
 fn main() {
+    use crate::parsing::parser::init_calc_parser;
+
     let interface = Interface::new("tinysh").unwrap();
     let style = Color::Cyan;
     let prompt_text = "tinysh> ";
@@ -14,7 +17,7 @@ fn main() {
 
     println!(
         "{}",
-        Color::Blue.paint("Welcome to tinysh 0.0.2 by Charlotte Thomas")
+        Color::Blue.paint("Welcome to tinysh 0.0.3 by Charlotte Thomas")
     );
 
     interface
@@ -38,11 +41,17 @@ fn main() {
                 )
             }
             "info" => {
-                println!("{}",Color::Purple.paint(" Tinysh v0.0.2\n By Charlotte Thomas\n Repository: https://github.com/tinysh"))
+                println!("{}",Color::Purple.paint(" Tinysh v0.0.3\n By Charlotte Thomas\n Repository: https://github.com/tinysh"))
             }
             _ => {
                 let lexer = Lexer { str: line.clone() };
-                println!("{:?}", lexer.lex());
+                let data = lexer.lex();
+                let parser = &mut init_calc_parser(&data);
+                let ast = parser.parse();
+                println!("Lexing of line : {}", &line);
+                println!("{:?}", &data);
+                println!("Parsing");
+                println!("{:?}", &ast);
             }
         }
         interface.add_history_unique(line);
