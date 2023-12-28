@@ -11,6 +11,8 @@ pub trait InfixParselet {
     fn get_precedence(&self) -> i64;
 }
 
+
+#[cfg(not(tarpaulin_include))]
 pub struct NullParset {}
 
 pub struct OperatorInfixParselet {
