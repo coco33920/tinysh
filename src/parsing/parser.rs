@@ -5,7 +5,7 @@ use crate::lexing::token::{Token, TokenType};
 use super::{
     ast::Ast,
     parselets::{
-        infix_parselet::{InfixParselet, NullParset},
+        infix_parselet::{InfixParselet, NullParset, OperatorInfixParselet},
         prefix_parselet::{
             GroupParselet, NullParselet, OperatorPrefixParselet, PrefixParselet, QuoteParselet,
             ValueParselet,
@@ -111,6 +111,26 @@ impl Parser<'_> {
 
     pub fn get_infix_parselet(self, token_type: TokenType) -> Option<Box<dyn InfixParselet>> {
         match token_type {
+            TokenType::Or => Some(Box::from(OperatorInfixParselet {
+                is_right: false,
+                precedence: 10,
+            })),
+            TokenType::And => Some(Box::from(OperatorInfixParselet {
+                is_right: false,
+                precedence: 10,
+            })),
+            TokenType::Pipe => Some(Box::from(OperatorInfixParselet {
+                is_right: false,
+                precedence: 8,
+            })),
+            TokenType::LeftRedirection => Some(Box::from(OperatorInfixParselet {
+                is_right: false,
+                precedence: 9,
+            })),
+            TokenType::RightRedirection => Some(Box::from(OperatorInfixParselet {
+                is_right: false,
+                precedence: 9,
+            })),
             _ => Some(Box::from(NullParset {})),
         }
     }
@@ -353,6 +373,108 @@ mod test {
         let expected = Ast::Nil;
         let data = Lexer {
             str: "&".to_string(),
+        };
+
+        let datalex = data.lex();
+        let parser = &mut init_calc_parser(&datalex);
+        let value = parser.parse();
+        assert_eq!(value, expected);
+    }
+
+    #[test]
+    pub fn test_and_infix() {
+        let expected = Ast::Node {
+            value: Parameters::And,
+            left: Box::from(Ast::new(Parameters::Int(1))),
+            right: Box::from(Ast::new(Parameters::Int(1))),
+        };
+        let data = Lexer {
+            str: "1 && 1".to_string(),
+        };
+
+        let datalex = data.lex();
+        let parser = &mut init_calc_parser(&datalex);
+        let value = parser.parse();
+        assert_eq!(value, expected);
+    }
+
+    #[test]
+    pub fn test_or_infix() {
+        let expected = Ast::Node {
+            value: Parameters::Or,
+            left: Box::from(Ast::new(Parameters::Int(1))),
+            right: Box::from(Ast::new(Parameters::Int(1))),
+        };
+        let data = Lexer {
+            str: "1 or 1".to_string(),
+        };
+
+        let datalex = data.lex();
+        let parser = &mut init_calc_parser(&datalex);
+        let value = parser.parse();
+        assert_eq!(value, expected);
+    }
+
+    #[test]
+    pub fn test_pipe_infix() {
+        let expected = Ast::Node {
+            value: Parameters::Pipe,
+            left: Box::from(Ast::new(Parameters::Int(1))),
+            right: Box::from(Ast::new(Parameters::Int(1))),
+        };
+        let data = Lexer {
+            str: "1 | 1".to_string(),
+        };
+
+        let datalex = data.lex();
+        let parser = &mut init_calc_parser(&datalex);
+        let value = parser.parse();
+        assert_eq!(value, expected);
+    }
+
+    #[test]
+    pub fn test_leftredirection_infix() {
+        let expected = Ast::Node {
+            value: Parameters::LeftRedirection,
+            left: Box::from(Ast::new(Parameters::Int(1))),
+            right: Box::from(Ast::new(Parameters::Int(1))),
+        };
+        let data = Lexer {
+            str: "1 > 1".to_string(),
+        };
+
+        let datalex = data.lex();
+        let parser = &mut init_calc_parser(&datalex);
+        let value = parser.parse();
+        assert_eq!(value, expected);
+    }
+
+    #[test]
+    pub fn test_rightredirection_infix() {
+        let expected = Ast::Node {
+            value: Parameters::RightRedirection,
+            left: Box::from(Ast::new(Parameters::Int(1))),
+            right: Box::from(Ast::new(Parameters::Int(1))),
+        };
+        let data = Lexer {
+            str: "1 < 1".to_string(),
+        };
+
+        let datalex = data.lex();
+        let parser = &mut init_calc_parser(&datalex);
+        let value = parser.parse();
+        assert_eq!(value, expected);
+    }
+
+    #[test]
+    pub fn test_null_infix() {
+        let expected = Ast::Node {
+            value: Parameters::Int(1),
+            left: Box::from(Ast::Nil),
+            right: Box::from(Ast::Nil),
+        };
+        let data = Lexer {
+            str: "1 & 1".to_string(),
         };
 
         let datalex = data.lex();
