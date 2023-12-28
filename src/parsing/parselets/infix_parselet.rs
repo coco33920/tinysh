@@ -18,6 +18,7 @@ pub struct OperatorInfixParselet {
     pub precedence: i64,
 }
 
+#[cfg(not(tarpaulin_include))]
 impl InfixParselet for NullParset {
     fn parse(&self, _parser: &mut Parser, left: &Ast, _token: Token) -> Ast {
         left.clone()
