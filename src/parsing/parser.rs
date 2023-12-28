@@ -135,13 +135,30 @@ impl Parser<'_> {
 
 #[cfg(test)]
 mod test {
-
     use crate::{
-        lexing::lexer::Lexer,
+        lexing::{lexer::Lexer, token::Token},
         parsing::ast::{Ast, Parameters},
     };
 
     use super::init_calc_parser;
+
+    #[test]
+    pub fn test_parser() {
+        let data = Lexer {
+            str: "(".to_string(),
+        };
+        let datalex = data.lex();
+        let parser = &mut init_calc_parser(&datalex);
+        assert_eq!(
+            parser.consume_expected(crate::lexing::token::TokenType::Or),
+            Token::Null
+        );
+        assert_eq!(parser.consume(), Token::Null);
+        assert_eq!(
+            parser.consume_expected(crate::lexing::token::TokenType::And),
+            Token::Null
+        );
+    }
 
     #[test]
     pub fn test_parse_int() {
@@ -305,6 +322,37 @@ mod test {
 
         let data = Lexer {
             str: "| true".to_string(),
+        };
+
+        let datalex = data.lex();
+        let parser = &mut init_calc_parser(&datalex);
+        let value = parser.parse();
+        assert_eq!(value, expected);
+    }
+
+    #[test]
+    pub fn test_group_prefix() {
+        let expected = Ast::Node {
+            value: Parameters::Pipe,
+            left: Box::from(Ast::new(Parameters::Bool(true))),
+            right: Box::from(Ast::Nil),
+        };
+
+        let data = Lexer {
+            str: "(| true)".to_string(),
+        };
+
+        let datalex = data.lex();
+        let parser = &mut init_calc_parser(&datalex);
+        let value = parser.parse();
+        assert_eq!(value, expected);
+    }
+
+    #[test]
+    pub fn test_null_parselet() {
+        let expected = Ast::Nil;
+        let data = Lexer {
+            str: "&".to_string(),
         };
 
         let datalex = data.lex();
